@@ -51,7 +51,7 @@ Sales record: TC1.Sales.json
 |              Corn              |    4     |   $13.55   |  $54.20  |
 +--------------------------------+----------+------------+----------+
 Total Cost of Sales: $2481.86
-Execution time: 0.021914 seconds
+Execution time: 0.027319 seconds
 
 Sales record: TC2.Sales.json
 +--------------------------------+----------+------------+-----------+
@@ -105,7 +105,7 @@ Sales record: TC2.Sales.json
 |              Corn              |   445    |   $13.55   |  $6029.75 |
 +--------------------------------+----------+------------+-----------+
 Total Cost of Sales: $172388.21
-Execution time: 0.042656 seconds
+Execution time: 0.050095 seconds
 
 Sales record: TC3.Sales.json
 Warning: Product: Elotes not found in the price catalogue.
@@ -159,4 +159,4 @@ Warning: Product: Frijoles not found in the price catalogue.
 |              Corn              |   445    |   $13.55   |  $6029.75 |
 +--------------------------------+----------+------------+-----------+
 Total Cost of Sales: $171055.35
-Execution time: 0.066965 seconds
+Execution time: 0.074471 seconds
