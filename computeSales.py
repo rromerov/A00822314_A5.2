@@ -3,23 +3,25 @@
 computeSales.py
 
 This script calculates the total cost of sales based on a price catalogue
-and a sales record provided as JSON files.
+and multiple sales records provided as JSON files.
 
 Usage:
-    python computeSales.py priceCatalogue.json salesRecord.json
+    python computeSales.py priceCatalogue.json salesRecord1.json salesRecord2.json salesRecord3.json
 
-The script takes two arguments:
+The script takes multiple arguments:
     - priceCatalogue.json: JSON file containing information about product
     prices.
-    - salesRecord.json: JSON file containing records of sales.
+    - salesRecord1.json, salesRecord2.json, salesRecord3.json: JSON files
+    containing records of sales.
 
-The script then computes the total cost of all sales recorded in
-salesRecord.json, using the prices from priceCatalogue.json, and outputs
-the result to the console and to a file named SalesResults.txt.
+The script then computes the total cost of all sales recorded in each
+salesRecord JSON file, using the prices from priceCatalogue.json, and
+outputs the result to the console and to a file named SalesResults.txt.
 """
 import json
 import sys
 from datetime import datetime
+from prettytable import PrettyTable
 
 
 def load_json(file_path):
@@ -41,66 +43,68 @@ def load_json(file_path):
         return None
 
 
-def compute_total_cost(price_catalogue, sales_record):
+def compute_total_cost(price_catalogue, sales_records):
     """
-    Compute the total cost of sales based on the price catalogue and sales
-    record.
+    Compute the total cost of sales based on the price catalogue and sales records.
 
     Parameters:
-    price_catalogue (list): List of dictionaries containing product
-    information.
-    sales_record (list): List of dictionaries containing sales record
-    information.
+    price_catalogue (list): List of dictionaries containing product information.
+    sales_records (list): List of lists of dictionaries containing sales record information.
 
     Returns:
-    float: Total cost of all sales.
+    dict: A dictionary containing the total cost of sales for each sales record file.
 
     """
-    total_cost = 0
-    for sale in sales_record:
-        product_name = sale.get('Product')
-        quantity = sale.get('Quantity')
-        for product in price_catalogue:
-            if product.get('title') == product_name:
-                total_cost += product.get('price', 0) * quantity
-                break
-    return total_cost
+    total_costs = {}
+    for i, sales_record in enumerate(sales_records, start=1):
+        total_cost = 0
+        for sale in sales_record:
+            product_name = sale.get('Product')
+            quantity = sale.get('Quantity')
+            for product in price_catalogue:
+                if product.get('title') == product_name:
+                    total_cost += product.get('price', 0) * quantity
+                    break
+        total_costs[f'SalesRecord{i}.json'] = total_cost
+    return total_costs
 
 
 def main():
     """
     Main function to execute the program.
     """
-    if len(sys.argv) != 3:
-        print('Incorrect usage. Please provide two JSON files as arguments')
+    if len(sys.argv) < 3:
+        print('Incorrect usage. Please provide at least two JSON files as arguments')
         return
 
     start_time = datetime.now()
 
     price_catalogue_path = sys.argv[1]
-    sales_record_path = sys.argv[2]
+    sales_record_paths = sys.argv[2:]
 
     price_catalogue = load_json(price_catalogue_path)
-    sales_record = load_json(sales_record_path)
+    sales_records = [load_json(path) for path in sales_record_paths]
 
-    if price_catalogue is None or sales_record is None:
+    if price_catalogue is None or None in sales_records:
         print('Error: Failed to load one or both of the JSON files.')
         return
 
-    total_cost = compute_total_cost(price_catalogue, sales_record)
+    total_costs = compute_total_cost(price_catalogue, sales_records)
 
     execution_time = datetime.now() - start_time
 
-    sales = f'Total cost of sales: ${total_cost:.2f}'
+    table = PrettyTable()
+    table.field_names = ["File", "Total Cost of Sales"]
+    for file_name, total_cost in total_costs.items():
+        table.add_row([file_name, f"${total_cost:.2f}"])
 
-    time = f'Execution time: {execution_time.total_seconds():.6f} seconds'
-
-    end_result = f'{sales}\n{time}'
-
-    print(end_result)
+    print(table)
+    print(f'Execution time: {execution_time.total_seconds():.6f} seconds')
 
     with open('SalesResults.txt', 'w', encoding='utf-8') as result_file:
-        result_file.write(end_result)
+        result_file.write(str(table))
+        result_file.write(f'Execution time: '
+                          f'{execution_time.total_seconds():.6f} seconds')
 
 
 if __name__ == '__main__':

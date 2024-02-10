@@ -1,2 +1,7 @@
-Total cost of sales: $166568.23
-Execution time: 0.004000 seconds
++-------------------+---------------------+
+|        File       | Total Cost of Sales |
++-------------------+---------------------+
+| SalesRecord1.json |       $2481.86      |
+| SalesRecord2.json |      $166568.23     |
+| SalesRecord3.json |      $165235.37     |
++-------------------+---------------------+Execution time: 0.001004 seconds
