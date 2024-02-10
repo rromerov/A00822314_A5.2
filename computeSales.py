@@ -3,16 +3,15 @@
 computeSales.py
 
 This script calculates the total cost of sales based on a price catalogue
-and multiple sales records provided as JSON files.
+and one or multiple sales records provided as JSON files.
 
 Usage:
-    python computeSales.py priceCatalogue.json salesRecord1.json salesRecord2.json salesRecord3.json
+    python computeSales.py priceCatalogue.json salesRecord.json
 
 The script takes multiple arguments:
     - priceCatalogue.json: JSON file containing information about product
     prices.
-    - salesRecord1.json, salesRecord2.json, salesRecord3.json: JSON files
-    containing records of sales.
+    - salesRecord.json: JSON file containing information about sales records.
 
 The script then computes the total cost of all sales recorded in each
 salesRecord JSON file, using the prices from priceCatalogue.json, and
@@ -43,16 +42,20 @@ def load_json(file_path):
         return None
 
 
-def compute_total_cost(price_catalogue, sales_records):
+def calculate_total_cost(price_catalogue, sales_records):
     """
-    Compute the total cost of sales based on the price catalogue and sales records.
+    Compute the total cost of sales based on the price catalogue and sales
+    records.
 
     Parameters:
-    price_catalogue (list): List of dictionaries containing product information.
-    sales_records (list): List of lists of dictionaries containing sales record information.
+    price_catalogue (list): List of dictionaries containing product
+    information.
+    sales_records (list): List of lists of dictionaries containing sales
+    record information.
 
     Returns:
-    dict: A dictionary containing the total cost of sales for each sales record file.
+    dict: A dictionary containing the total cost of sales for each sales
+    record file.
 
     """
     total_costs = {}
@@ -74,7 +77,8 @@ def main():
     Main function to execute the program.
     """
     if len(sys.argv) < 3:
-        print('Incorrect usage. Please provide at least two JSON files as arguments')
+        print('Incorrect usage. Please provide at least two JSON files as '
+              'arguments')
         return
 
     start_time = datetime.now()
@@ -89,7 +93,7 @@ def main():
         print('Error: Failed to load one or both of the JSON files.')
         return
 
-    total_costs = compute_total_cost(price_catalogue, sales_records)
+    total_costs = calculate_total_cost(price_catalogue, sales_records)
 
     execution_time = datetime.now() - start_time
 
