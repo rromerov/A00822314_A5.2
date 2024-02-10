@@ -17,6 +17,7 @@ The script then computes the total cost of all sales recorded in each
 salesRecord JSON file, using the prices from priceCatalogue.json, and
 outputs the result to the console and to a file named SalesResults.txt.
 """
+
 import json
 import sys
 from datetime import datetime
@@ -42,7 +43,7 @@ def load_json(file_path):
         return None
 
 
-def calculate_total_cost(price_catalogue, sales_records):
+def calculate_total_cost(price_catalogue, sales_record):
     """
     Compute the total cost of sales based on the price catalogue and sales
     records.
@@ -50,26 +51,27 @@ def calculate_total_cost(price_catalogue, sales_records):
     Parameters:
     price_catalogue (list): List of dictionaries containing product
     information.
-    sales_records (list): List of lists of dictionaries containing sales
+    sales_record (list): List of dictionaries containing sales
     record information.
 
     Returns:
-    dict: A dictionary containing the total cost of sales for each sales
-    record file.
+    float: Total cost of sales for the given sales record.
 
     """
-    total_costs = {}
-    for i, sales_record in enumerate(sales_records, start=1):
-        total_cost = 0
-        for sale in sales_record:
-            product_name = sale.get('Product')
-            quantity = sale.get('Quantity')
-            for product in price_catalogue:
-                if product.get('title') == product_name:
-                    total_cost += product.get('price', 0) * quantity
-                    break
-        total_costs[f'SalesRecord{i}.json'] = total_cost
-    return total_costs
+    total_cost = 0
+    for sale in sales_record:
+        product_name = sale.get('Product')
+        quantity = abs(sale.get('Quantity'))  # Ensure quantity is positive
+        for product in price_catalogue:
+            if product.get('title') == product_name:
+                unit_price = product.get('price', 0)
+                if unit_price < 0:
+                    print(f'Warning: Product "{product_name}" has a negative '
+                          'price, converting to positive.')
+                    unit_price = abs(unit_price)  # Convert to positive
+                total_cost += unit_price * quantity
+                break
+    return total_cost
 
 
 def main():
@@ -86,29 +88,71 @@ def main():
     price_catalogue_path = sys.argv[1]
     sales_record_paths = sys.argv[2:]
 
+    # Load the price catalogue JSON file
     price_catalogue = load_json(price_catalogue_path)
-    sales_records = [load_json(path) for path in sales_record_paths]
 
-    if price_catalogue is None or None in sales_records:
-        print('Error: Failed to load one or both of the JSON files.')
+    if price_catalogue is None:
+        print('Error: Failed to load the price catalogue JSON file.')
         return
 
-    total_costs = calculate_total_cost(price_catalogue, sales_records)
-
-    execution_time = datetime.now() - start_time
-
-    table = PrettyTable()
-    table.field_names = ["File", "Total Cost of Sales"]
-    for file_name, total_cost in total_costs.items():
-        table.add_row([file_name, f"${total_cost:.2f}"])
-
-    print(table)
-    print(f'Execution time: {execution_time.total_seconds():.6f} seconds')
-
     with open('SalesResults.txt', 'w', encoding='utf-8') as result_file:
-        result_file.write(str(table))
-        result_file.write(f'Execution time: '
-                          f'{execution_time.total_seconds():.6f} seconds')
+        for sales_record_path in sales_record_paths:
+            sales_record = load_json(sales_record_path)
+            if sales_record is None:
+                print(f'Error: Failed to load the sales record JSON file: '
+                      f'{sales_record_path}')
+                continue
+
+            # Print the filename of the sales record
+            print(f"\nSales record: {sales_record_path}")
+            print(f"\nSales record: {sales_record_path}", file=result_file)
+
+            # Calculate the total cost of sales
+            total_cost = calculate_total_cost(price_catalogue, sales_record)
+
+            # Print the product information
+            table = PrettyTable()
+            table.field_names = ["Product", "Quantity",
+                                 "Unit Price", "Subtotal"]
+            for sale in sales_record:
+                product_name = sale.get('Product')
+                quantity = sale.get('Quantity')
+                if quantity < 0:
+                    print(f'Warning: Negative quantity for product:'
+                          f'{product_name} found. Converting to positive.')
+                    quantity = abs(quantity)  # Convert to positive
+                else:
+                    quantity = abs(quantity)  # Ensure quantity is positive
+                for product in price_catalogue:
+                    if product.get('title') == product_name:
+                        unit_price = product.get('price', 0)
+                        if unit_price < 0:
+                            unit_price = abs(unit_price)  # Convert to positive
+                        subtotal = unit_price * quantity
+                        table.add_row([product_name, quantity,
+                                       f"${abs(unit_price):.2f}",
+                                       f"${subtotal:.2f}"])
+                        break
+                else:
+                    print(f'Warning: Product: {product_name} not found in the '
+                          'price catalogue.')
+                    print(f'Warning: Product: {product_name} not found in the '
+                          'price catalogue.', file=result_file)
+            print(table)
+            print(table, file=result_file)
+
+            # Print the total cost of sales
+            print(f'Total Cost of Sales: ${total_cost:.2f}')
+            print(f'Total Cost of Sales: ${total_cost:.2f}',
+                  file=result_file)
+
+            # Print execution time
+            print(f'Execution time: '
+                  f'{(datetime.now() - start_time).total_seconds():.6f} '
+                  'seconds')
+            print(f'Execution time: '
+                  f'{(datetime.now() - start_time).total_seconds():.6f} '
+                  'seconds', file=result_file)
 
 
 if __name__ == '__main__':
