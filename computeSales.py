@@ -36,9 +36,12 @@ def load_json(file_path):
 
     """
     try:
+        # Try to open the file in read mode with UTF-8 encoding
         with open(file_path, 'r', encoding='utf-8') as file:
+            # Load JSON data from the file
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError) as e:
+        # Handle exceptions if the file is not found or JSON decoding fails
         print(f'Error loading {file_path}: {e}')
         return None
 
@@ -58,35 +61,38 @@ def calculate_total_cost(price_catalogue, sales_record):
     float: Total cost of sales for the given sales record.
 
     """
-    total_cost = 0
-    for sale in sales_record:
-        product_name = sale.get('Product')
-        quantity = abs(sale.get('Quantity'))  # Ensure quantity is positive
-        for product in price_catalogue:
-            if product.get('title') == product_name:
-                unit_price = product.get('price', 0)
-                if unit_price < 0:
+    total_cost = 0  # Initialize total cost
+    for sale in sales_record:  # Iterate through each sale record
+        product_name = sale.get('Product')  # Extract product name
+        quantity = abs(sale.get('Quantity'))  # Get absolute quantity sold
+        for product in price_catalogue:  # Search for product in catalogue
+            if product.get('title') == product_name:  # Match product name
+                unit_price = product.get('price', 0)  # Get unit price
+                if unit_price < 0:  # Handle negative unit price
+                    # Warn and convert negative price to positive
                     print(f'Warning: Product "{product_name}" has a negative '
-                          'price, converting to positive.')
-                    unit_price = abs(unit_price)  # Convert to positive
+                          f'price, converting to positive.')
+                    unit_price = abs(unit_price)
+                # Calculate total cost for this product and add to total
                 total_cost += unit_price * quantity
-                break
-    return total_cost
+                break  # Stop searching once product is found
+    return total_cost  # Return total cost of sales
 
 
 def main():
     """
     Main function to execute the program.
     """
+    # Check if the correct number of arguments are provided
     if len(sys.argv) < 3:
         print('Incorrect usage. Please provide at least two JSON files as '
               'arguments')
         return
 
-    start_time = datetime.now()
+    start_time = datetime.now()  # Record start time
 
-    price_catalogue_path = sys.argv[1]
-    sales_record_paths = sys.argv[2:]
+    price_catalogue_path = sys.argv[1]  # Get the price catalogue file path
+    sales_record_paths = sys.argv[2:]  # Get the sales record file paths
 
     # Load the price catalogue JSON file
     price_catalogue = load_json(price_catalogue_path)
@@ -96,9 +102,11 @@ def main():
         return
 
     with open('SalesResults.txt', 'w', encoding='utf-8') as result_file:
+        # Iterate through each sales record JSON file
         for sales_record_path in sales_record_paths:
             sales_record = load_json(sales_record_path)
             if sales_record is None:
+                # Print error message and skip to the next sales record
                 print(f'Error: Failed to load the sales record JSON file: '
                       f'{sales_record_path}')
                 continue
@@ -118,6 +126,7 @@ def main():
                 product_name = sale.get('Product')
                 quantity = sale.get('Quantity')
                 if quantity < 0:
+                    # Warn and convert negative quantity to positive
                     print(f'Warning: Negative quantity for product:'
                           f'{product_name} found. Converting to positive.')
                     quantity = abs(quantity)  # Convert to positive
@@ -138,7 +147,7 @@ def main():
                           'price catalogue.')
                     print(f'Warning: Product: {product_name} not found in the '
                           'price catalogue.', file=result_file)
-            print(table)
+            print(table)  # Print the product information
             print(table, file=result_file)
 
             # Print the total cost of sales
