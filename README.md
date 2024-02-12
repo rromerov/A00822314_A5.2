@@ -24,5 +24,5 @@ salesRecord1.json salesRecord2.json salesRecord3.json
 
 Al ejecutarlo se imprime tanto en consola como en el archivo `SalesResults.txt` el registro de ventas con el precio total de cada venta, así como el tiempo que tardó en ejecutarse el script, para acceder a el, se puede dar clic [aquí](SalesResults.txt).
 
-
+Las capturas de ejecución del script se encuentran en el siguiente archivo [A00822314_A5.2](A00822314_A5.2.pdf).
 
